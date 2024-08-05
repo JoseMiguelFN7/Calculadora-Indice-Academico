@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registrar Materia</title>
+    <link rel="stylesheet" href="../styles/agregarMateria.css">
+</head>
+<body>
+    <main class="flex-column-center">
+        <form method="post" id="formDatosMateria">
+            <div class="campos">
+                <label for="nombre">Nombre:</label>
+                <input type="text" name="nombre" id="nombre" required>
+                <label for="UC">UC:</label>
+                <input type="number" name="UC" id="UC" min="0" step="1" required>
+                <label for="nota">Nota:</label>
+                <select name="nota" id="nota" required></select>
+                <label for="trimestre">Trimestre:</label>
+                <input type="number" name="trimestre" id="trimestre" min="0" step="1" required>
+            </div>
+            <div class="flex-row-even button-container">
+                <button class="opButton" type="submit" form="formDatosMateria">Confirmar</button>
+                <button class="opButton" onclick="window.location.href='../'">Volver</button>
+            </div>
+        </form>
+    </main>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script>
+        window.jQuery || document.write('<script src="../CDNs/jquery.js"><\/script>')
+    </script>
+    <script>
+        function getListaNotas(){
+            $.ajax({
+                url: "../php/getListaNotas.php",
+                dataType: 'json',
+                type: "POST",
+                success: function(result){
+                    console.log(result);
+                    $("#nota").empty();
+                    result.forEach(element => {
+                        $("#nota").append("<option value='" + element.Nota + "'>" + element.Nota + "</option>");
+                    });
+                },
+                error: function(){
+                    console.log("FALLOOOOOOOOOOOOOOOOOOO");
+                }
+            });
+        }
+
+        function cargarMateria(){
+            $.ajax({
+                url: "../php/cargarMateria.php",
+                data:{
+                    nombre: $("#nombre").val(),
+                    UC: $("#UC").val(),
+                    nota: $("#nota").val(),
+                    trimestre: $("#trimestre").val()
+                },
+                type: "POST",
+                success: function(result){
+                    console.log(result);
+                    alert("Materia agregada exitosamente.");
+                    location.href = "../";
+                },
+                error: function(){
+                    console.log("FALLOOOOOOOOOOOOOOOOOOO");
+                }
+            });
+        }
+
+        function checkMateria(){
+            $.ajax({
+                url: "../php/consultarMateria.php",
+                dataType:"json",
+                data:{
+                    Nombre: $("#nombre").val()
+                },
+                type: "POST",
+                success: function(result){
+                    console.log(result);
+                    let materiaRep = result.length != 0;
+                    console.log(materiaRep);
+                    if(materiaRep){
+                        alert("Esta materia ya está registrada.");
+                    } else{
+                        cargarMateria();
+                        console.log("CARGADISIMA");
+                    }
+                },
+                error: function(){
+                    console.log("FALLOOOOOOOOOOOOOOOOOOO");
+                }
+            });
+        }
+
+        $(document).ready(function(){
+            getListaNotas();
+        });
+
+        $("#formDatosMateria").submit(function(event){
+            event.preventDefault();
+            checkMateria();
+        });
+    </script>
+</body>
+</html>

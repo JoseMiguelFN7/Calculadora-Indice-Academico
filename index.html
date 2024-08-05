@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notas</title>
+    <link rel="stylesheet" href="./styles/dataTableStyle.css">
+    <link rel="stylesheet" href="./styles/index.css">
+</head>
+<body>
+    <center>
+        <main>
+            <h1>Materias Cursadas</h1>
+            <div class="flex-row-even button-container">
+                <button class="opButton" onclick="window.location.href='./vistas/registrarNota.html'">Registrar Materia</button>
+                <button class="opButton" onclick="window.location.href='./vistas/modificarMateria.html'">Modificar Materia</button>
+                <button class="opButton" onclick="window.location.href='./vistas/borrarMateria.html'">Borrar Materia</button>
+            </div>
+            <table id="tabla-notas" class="display" style="width: 100%;">
+                <thead>
+                    <tr><th>Nombre</th><th>UC</th><th>Nota</th><th>Trimestre</th></tr>
+                </thead>
+                <tbody id="cuerpo-notas"></tbody>
+            </table>
+            <div id="IA"></div>
+        </main>
+    </center>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script>
+        window.jQuery || document.write('<script src="../CDNs/jquery.js"><\/script>')
+    </script>
+    <script src="./CDNs/dataTable.js"></script>
+    <script>
+        function consultaMaterias(){
+            $.ajax({
+                url: "./php/consultarNotas.php",
+                dataType: 'json',
+                type: "POST",
+                success: function(result){
+                    console.log(result);
+                    let table = $("#tabla-notas").DataTable();
+                    table.clear()
+                    result.forEach(element => {
+                        table.row.add([
+                            element.Nombre,
+                            element.UC,
+                            element.Nota,
+                            element.Trimestre
+                        ]).draw(false);
+                    });
+                },
+                error: function(){
+                    console.log("FALLOOOOOOOOOOOOOOOOOOO");
+                }
+            });
+        }
+
+        function consultaIA(){
+            $.ajax({
+                url: "./php/consultarIA.php",
+                dataType: 'json',
+                type: "POST",
+                success: function(result){
+                    console.log(result);
+                    $("#IA").empty();
+                    $("#IA").html("Indice Academico: " + result[0].IA + " Pts.");
+                },
+                error: function(){
+                    console.log("FALLOOOOOOOOOOOOOOOOOOO");
+                }
+            });
+        }
+
+        $(document).ready(function(){
+            consultaMaterias();
+            consultaIA();
+            let tablaNotas = new DataTable("#tabla-notas");
+        });
+    </script>
+</body>
+</html>

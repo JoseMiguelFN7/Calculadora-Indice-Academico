@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modificar Materia</title>
+    <link rel="stylesheet" href="../styles/modificarMateria.css">
+</head>
+<body>
+    <main class="flex-column-center">
+        <form method="post" id="formModMateria">
+            <div class="campos">
+                <label for="nombre-list">Materia a modificar:</label>
+                <select name="nombre-list" id="nombre-list" required onchange="insertarValsMateria()"><option value=""></option></select>
+                <label for="nombre">Nombre:</label>
+                <input type="text" name="nombre" id="nombre" required>
+                <label for="UC">UC:</label>
+                <input type="number" name="UC" id="UC" min="0" step="1" required>
+                <label for="nota">Nota:</label>
+                <select name="nota" id="nota" required></select>
+                <label for="trimestre">Trimestre:</label>
+                <input type="number" name="trimestre" id="trimestre" min="0" step="1" required>
+            </div>
+            <div class="flex-row-even button-container">
+                <button class="opButton" type="submit" form="formModMateria">Confirmar</button>
+                <button class="opButton" onclick="window.location.href='../'">Volver</button>
+            </div>
+        </form>
+    </main>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script>
+        window.jQuery || document.write('<script src="../CDNs/jquery.js"><\/script>')
+    </script>
+    <script>
+        function getListaNotas(){
+            $.ajax({
+                url: "../php/getListaNotas.php",
+                dataType: 'json',
+                type: "POST",
+                success: function(result){
+                    console.log(result);
+                    $("#nota").empty();
+                    result.forEach(element => {
+                        $("#nota").append("<option value='" + element.Nota + "'>" + element.Nota + "</option>");
+                    });
+                },
+                error: function(){
+                    console.log("FALLOOOOOOOOOOOOOOOOOOO");
+                }
+            });
+        }
+
+        function getNombresMaterias(){
+            $.ajax({
+                url: "../php/getNombreMaterias.php",
+                dataType: 'json',
+                type: "POST",
+                success: function(result){
+                    console.log(result);
+                    result.forEach(element => {
+                        $("#nombre-list").append("<option value='" + element.Nombre + "'>" + element.Nombre + "</option>");
+                    });
+                },
+                error: function(){
+                    console.log("FALLOOOOOOOOOOOOOOOOOOO");
+                }
+            });
+        }
+
+        let ID = "";
+
+        function insertarValsMateria(){
+            if($("#nombre-list").val()==""){
+                ID = "";
+                $("#nombre").val("");
+                $("#UC").val("");
+                $("#nota").val("");
+                $("#trimestre").val("");
+                return;
+            }
+            $.ajax({
+                url: "../php/consultarMateria.php",
+                dataType: 'json',
+                data:{
+                    Nombre: $("#nombre-list").val(),
+                },
+                type: "POST",
+                success: function(result){
+                    console.log(result);
+                    result.forEach(element => {
+                        ID = element.ID;
+                        $("#nombre").val(element.Nombre);
+                        $("#UC").val(element.UC);
+                        $("#nota").val(element.Nota);
+                        $("#trimestre").val(element.Trimestre);
+                    });
+                },
+                error: function(){
+                    console.log("FALLOOOOOOOOOOOOOOOOOOO");
+                }
+            });
+        }
+
+        function modificarMateria(){
+            $.ajax({
+                url: "../php/modificarMateria.php",
+                data:{
+                    ID: ID,
+                    nombre: $("#nombre").val(),
+                    UC: $("#UC").val(),
+                    nota: $("#nota").val(),
+                    trimestre: $("#trimestre").val()
+                },
+                type: "POST",
+                success: function(result){
+                    console.log(result);
+                    alert("Materia modificada exitosamente.");
+                    location.href = "../";
+                },
+                error: function(){
+                    console.log("FALLOOOOOOOOOOOOOOOOOOO");
+                }
+            });
+        }
+
+        $(document).ready(function(){
+            getListaNotas();
+            getNombresMaterias();
+        });
+
+        $("#formModMateria").submit(function(event){
+            event.preventDefault();
+            if($("#nombre-list").val()==""){
+                alert("Seleccione una materia.");
+            } else{
+                modificarMateria();
+            }
+        });
+    </script>
+</body>
+</html>
